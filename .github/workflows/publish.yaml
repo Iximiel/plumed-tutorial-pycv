@@ -1,0 +1,21 @@
+# This workflow will compress the files in a zip and upload them to the school release
+
+on:
+  push:
+    branches: main
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: compress files
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+        shell: bash
+        run: |
+          zip plumed-tutorial-pycv.zip *.md EMBED.yml
+          gh release upload --clobber School plumed-tutorial-pycv.zip 
