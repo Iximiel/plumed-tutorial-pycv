@@ -1,7 +1,7 @@
 # Using PyCV
 ## Installation
 
-_Note that currently we are working on a simpler installation procedure_
+_Note that currently we are working on a simpler installation procedure, and some names may change_
 
 For compiling the plugin you just need pybind11 and numpy.
 I always recomend to create and ad-hoc environment for your projects:
@@ -27,7 +27,12 @@ When using pycv the user will need to create a module[^1] that must at least con
 
 [^1]: a module is a `.py` file or a directory that contains an `__init__.py`, here we will only show `py` files
 
-#### What to write in the plumed.dat
+#### What to write in the plumed.dat (PYCVINTERFACE)
+
+```plumed
+cvPY: PYCVINTERFACE ATOMS=1,4 IMPORT=pydistancePBCs CALCULATE=pydist
+```
+
   - `IMPORT` this is the only mandatory keyword, this indicates the python module to load
   - `INIT` indicates the function to call at initialization. Defaults to `plumedInit`
     - `COMPONENTS` can be specified either in python or in the plumed.dat 
@@ -36,6 +41,43 @@ When using pycv the user will need to create a module[^1] that must at least con
   - `CALCULATE` indicates the function to call at calculate time. Defaults to `plumedCalculate`
   - `PREPARE` indicates the function to call at prepare time. Ignored if not specified
   - `UPDATE` indicates the function to call at update time. Ignored if not specified
+
+#### What to write in the plumed.dat (PYFUNCTION)
+```plumed
+d1: DISTANCE ATOMS=1,2
+d2: DISTANCE ATOMS=1,3 
+
+fPY: PYFUNCTION IMPORT=pycvfunc CALCULATE=plumedCalculate ARG=d1,d2
+```
+
+  - `IMPORT` this is the only mandatory keyword, this indicates the python module to load
+  - `INIT` indicates the function to call at initialization. Defaults to `plumedInit`
+    - `COMPONENTS` can be specified either in python or in the plumed.dat 
+  - `CALCULATE` indicates the function to call at calculate time. Defaults to `plumedCalculate`
+  - `ARG` the list of arguments, to be specified in the plumed.dat
+
+PYFUNCTION is simpler: but needs to get the arguments from the plumed object
+
+```python
+import plumedCommunications as PLMD
+import numpy
+
+plumedInit={"Value": PLMD.defaults.COMPONENT_NODEV}
+
+def plumedCalculate(action: PLMD.PythonFunction):
+    arg = [action.argument(0),action.argument(1)]
+    return arg[0]*arg[0]*arg[1]
+```
+#### The functions
+
+For both PYFUNCTION and PYCVINTERFACE the function called by plumed must accept a specific object.
+    - PYCVINTERFACE functions will expect a `plumedCommunications.PythonCVInterface` object
+    - PYFUNCTION functions will expect a `plumedCommunications.PythonFunction` object
+
+These object are used to retrieve data and settings from plumed. Plumed will get data back with the `data` attribute (see [below](#the-data-attribute)) but mainly with the use of returned dictionaries.
+
+In the [examples](examples.md#getting-the-manual) I show how to retrieve the manual for those objects
+
 
 #### Initialization
 
