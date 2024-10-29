@@ -1,7 +1,7 @@
 # Using PyCV
 ## Installation
 
-_Note that currently we are working on a simpler installation procedure, and some names may change_
+_Note that currently we are working on a simpler installation procedure, and some names may change. The actual version canno be called from within the plumed python interface_
 
 For compiling the plugin you just need pybind11 and numpy.
 I always recomend to create and ad-hoc environment for your projects:
@@ -36,8 +36,9 @@ cvPY: PYCVINTERFACE ATOMS=1,4 IMPORT=pydistancePBCs CALCULATE=pydist
   - `IMPORT` this is the only mandatory keyword, this indicates the python module to load
   - `INIT` indicates the function to call at initialization. Defaults to `plumedInit`
     - `COMPONENTS` can be specified either in python or in the plumed.dat 
-    - `ATOMS`, `GROUPA`,`GROUPB`  can be specified either in python or in the plumed.dat
-  - `NOPBC`, `PAIR`,`NLIST`,`NL_CUTOFF`,`NL_STRIDE` can only specified int the plumed.dat
+    - `NOPBC`  can be specified either in python or in the plumed.dat
+    - `ATOMS`, `GROUPA`,`GROUPB` , using `GROUP*` will make plumed set up a neigbour list between the groups, or group A, whereas with ATOMS all the atom will be passsed 
+  - `PAIR`,`NLIST`,`NL_CUTOFF`,`NL_STRIDE` can only specified int the plumed.dat ~to be verified~
   - `CALCULATE` indicates the function to call at calculate time. Defaults to `plumedCalculate`
   - `PREPARE` indicates the function to call at prepare time. Ignored if not specified
   - `UPDATE` indicates the function to call at update time. Ignored if not specified
