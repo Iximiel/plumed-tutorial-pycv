@@ -1,10 +1,10 @@
 # Using PyCV
 ## Installation
 
-_Note that currently we are working on a simpler installation procedure, and some names may change. The actual version canno be called from within the plumed python interface_
+_Note that currently we are working on a simpler installation procedure, and some names may change. The actual version cannot be called from within the plumed python interface_
 
 For compiling the plugin you just need pybind11 and numpy.
-I always recomend to create and ad-hoc environment for your projects:
+I always recommend creating and ad-hoc environment for your projects:
 ```bash
 python3 -m venv pycvenv
 source ./pycvenv/bin/activate
@@ -17,7 +17,7 @@ If you have a plumed that supports plumed mklib with multiple files you can simp
 ```bash
 ./standaloneCompile.sh
 ```
-This usually goes smooth, expecially if plumed has already found the necessary python configuration and `plumed --no-mpi config makefile_conf | grep canPyCV` returns `canPyCV=yes`.
+This usually goes smooth, especially if plumed has already found the necessary python configuration and `plumed --no-mpi config makefile_conf | grep canPyCV` returns `canPyCV=yes`.
 
 After running `./standaloneCompile.sh` you should have a `PythonCVInterface.so` file into the pycv directory
 
@@ -25,7 +25,7 @@ After running `./standaloneCompile.sh` you should have a `PythonCVInterface.so` 
 
 When using pycv the user will need to create a module[^1] that must at least contain an initialization dictionary and a calculate function
 
-[^1]: a module is a `.py` file or a directory that contains an `__init__.py`, here we will only show `py` files
+[^1]: a module is a `.py` file or a directory that contains a `__init__.py`, here we will only show `py` files
 
 #### What to write in the plumed.dat (PYCVINTERFACE)
 
@@ -35,10 +35,10 @@ cvPY: PYCVINTERFACE ATOMS=1,4 IMPORT=pydistancePBCs CALCULATE=pydist
 
   - `IMPORT` this is the only mandatory keyword, this indicates the python module to load
   - `INIT` indicates the function to call at initialization. Defaults to `plumedInit`
-    - `COMPONENTS` can be specified either in python or in the plumed.dat 
-    - `NOPBC`  can be specified either in python or in the plumed.dat
-    - `ATOMS`, `GROUPA`,`GROUPB` , using `GROUP*` will make plumed set up a neigbour list between the groups, or group A, whereas with ATOMS all the atom will be passsed 
-  - `PAIR`,`NLIST`,`NL_CUTOFF`,`NL_STRIDE` can only specified int the plumed.dat ~to be verified~
+  - `COMPONENTS` can be specified either in python or in the plumed.dat 
+  - `NOPBC` can be specified either in python or in the plumed.dat
+  - `ATOMS`, `GROUPA`,`GROUPB`, using `GROUP*` will make plumed set up a neighbor list between the groups, or group A, whereas with ATOMS all the atom will be passed 
+  - `PAIR`,`NLIST`,`NL_CUTOFF`,`NL_STRIDE` can only be specified in the plumed.dat ~to be verified~
   - `CALCULATE` indicates the function to call at calculate time. Defaults to `plumedCalculate`
   - `PREPARE` indicates the function to call at prepare time. Ignored if not specified
   - `UPDATE` indicates the function to call at update time. Ignored if not specified
@@ -75,7 +75,7 @@ For both PYFUNCTION and PYCVINTERFACE the function called by plumed must accept 
     - PYCVINTERFACE functions will expect a `plumedCommunications.PythonCVInterface` object
     - PYFUNCTION functions will expect a `plumedCommunications.PythonFunction` object
 
-These object are used to retrieve data and settings from plumed. Plumed will get data back with the `data` attribute (see [below](#the-data-attribute)) but mainly with the use of returned dictionaries.
+These objects are used to retrieve data and settings from plumed. Plumed will get data back with the `data` attribute (see [below](#the-data-attribute)) but mainly with the use of returned dictionaries.
 
 In the [examples](examples.md#getting-the-manual) I show how to retrieve the manual for those objects
 
@@ -84,7 +84,7 @@ In the [examples](examples.md#getting-the-manual) I show how to retrieve the man
 
 If in the plumed.dat `INIT` is not specified, plumed will search for an object "plumedInit",
 that can be either a function that returns a dict or a dict
-This dict MUST contain at least the informations about the presence of the
+This dict MUST contain at least the information about the presence of the
 derivatives and on the periodicity of the variable.
 We will refer to this dict as "the _init dict_" from now.
 
@@ -93,15 +93,14 @@ return and how they shall behave.
 Along this the dict can contain all the keyword that are compatible with
 PYCVINTERFACE.
 Mind that if the same keyword is specified both in the _init dict_ and in the
-plumed file the calculation will be aborted to avoid unwated settings confict.
-In case of flags the dict entry must be a bool, differently from the standard
+plumed file the calculation will be aborted to avoid unwanted settings conflicts.
+In case of flags the dict entry must be a boolean, differently from the standard
 plumed input.
-
 
 
 The only keyword that can only be specified in python is `COMPONENTS`.
 The `COMPONENTS` key must point to a dict that has as keys the names of the
-componensts.
+components.
 Each component dictionary must have two keys:
  - `"period"`: `None` of a list of two values, min and max (like `[0,1]` or also
  strings like `["0.5*pi","2*pi"]`)
@@ -115,8 +114,8 @@ To avoid confusion you cannot specify both `"COMPONENTS"` and `"Value"` in the
 
 To speed up the declarations of the components the `plumedCommunications` module
 contains a submodule `defaults` with the default dictionaries already set up:
- - plumedCommunications.defaults.COMPONENT={"period":None, "derivative":True}
- - plumedCommunications.defaults.COMPONENT_NODEV={"period":None, "derivative":False}
+ - `plumedCommunications.defaults.COMPONENT={"period":None, "derivative":True}`
+ - `plumedCommunications.defaults.COMPONENT_NODEV={"period":None, "derivative":False}`
 
 #### Calculate
 
@@ -124,8 +123,8 @@ If `CALCULATE` is not specified, plumed will search for a function named
 "plumedCalculate" plumed will read the variable returned accordingly to what it
 was specified in the initialization dict.
 
-The calculate funtion must, as all the other functions accept a
-PLMD.PythonCVInterface object as only input.
+The calculate function must, as all the other functions accept a
+`plumedCommunications.PythonCVInterface` (or a `plumedCommunications.PythonFunction` in case of a pyfunction) object as only input.
 
 The calculate function must either return a float or a tuple or, in the case of
 multiple components, a dict whose keys are the name of the components, whose
@@ -143,12 +142,12 @@ derivative (that can also have shape(9), with format (x_x, x_y, x_z, y_x, y_y,
 y_z, z_x, z_y, z_z)), if the box derivative are not present a WARNING will be
 raised, but the calculation won't be interrupted.
 
-#### Prepate
+#### Prepare
 
 If the `PREPARE` keyword is used, the defined function will be called at
 prepare time, before calculate.
-The prepare dictionary can contain a `"setAtomRequest"` key with a parseable
-ATOM string, like in the input (or a list of indexes, 0 based).
+The returned "prepare" dictionary can contain a `"setAtomRequest"` key with a parseable
+ATOM string, like in the standard plumed input (or a list of indexes, 0 based).
 ```python
 #this , with "PREPARE=changeAtom" in the plumed file will select a new atom at each new step
 def changeAtom(plmdAction: plumedCommunications.PythonCVInterface):
@@ -164,7 +163,7 @@ time, after calculate. As now plumed will ignore the return of this function
 (but it stills need to return a dict) and it is intended to accumulate things
 or post process data afer calculate
 
-In the example `plmdAction.data["pycv"]=0` is intialized in `pyinit` and its
+In the example `plmdAction.data["pycv"]=0` is initialized in `pyinit` and its
 value is updated in calculate.
 
 

@@ -29,6 +29,9 @@ def plumedInit(_):
     with open('PythonCVInterface.help.txt', 'w') as f:
         h = pydoc.Helper(output=f)
         h(plumedCommunications.PythonCVInterface)
+    with open('PythonFunction.help.txt', 'w') as f:
+        h = pydoc.Helper(output=f)
+        h(plumedCommunications.PythonFunction)
     with open('plumedCommunications.help.txt', 'w') as f:
         h = pydoc.Helper(output=f)
         h(plumedCommunications)
@@ -43,9 +46,28 @@ def plumedCalculate(_):
 Then run with
 `plumed driver --plumed plumed.dat --ixyz traj.xyz`
 
-This thing won't run, but you will get the manual of the interface in three txt files.
+This thing will not have any results on the trajectory, but you will get the manual of the interface in a few txt files.
+
+Or alternatively you can run:
+###### pyhelp_html.py
+```python
+import plumedCommunications
+import pydoc
+
+def plumedInit(_):
+    pydoc.writedoc(plumedCommunications)
+    pydoc.writedoc(plumedCommunications.defaults)
+    return {"Value":plumedCommunications.defaults.COMPONENT_NODEV, "ATOMS":"1"}
+
+def plumedCalculate(_):
+    return 0
+```
+To get an extreme bare-bones HTML documentation, that you can browse 
+by running `python -m http.server` and then going to the address that appears on the terminal, that usually is 0.0.0.0:8000, with your internet browser.
 
 ### Distance (with PBC)
+
+In this example we show how to use the PBCs in a calculation:
 
 ###### plumed.dat
 ```plumed
@@ -75,11 +97,11 @@ def pydist(action: plumedCommunications.PythonCVInterface):
     return d
 
 ```
-Here we are getting the pbc calculator from plumed and "patching" the distances with it by using the method `apply` like in C++ plumed, but on a list/np.ndarray
+Here we are getting the pbc calculator from plumed and "patching" the distances with it by using the method `apply` like in C++ plumed, but on a `list/np.ndarray` that must be shaped `[nat,3]`
 
 ### Periodicity
 
-This is just an example on how the user can work with the periodicity
+This is just an example on how the user can work with the periodicity of the retuned variables
 ###### plumed.dat
 ```plumed
 LOAD FILE=path/to/PythonCVInterface.so
@@ -103,7 +125,6 @@ plumedInit = dict(
     ATOMS="1,2",
 )
 
-
 def plumedCalculate(action: PLMD.PythonCVInterface):
     ret = {
         "nonPeriodic": action.getStep(),
@@ -114,7 +135,7 @@ def plumedCalculate(action: PLMD.PythonCVInterface):
     return ret
 ```
 
-### Getting informations
+### Getting simulation information
 
 ###### plumed.dat
 ```plumed
