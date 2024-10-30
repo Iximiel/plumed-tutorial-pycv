@@ -23,7 +23,7 @@ After running `./standaloneCompile.sh` you should have a `PythonCVInterface.so` 
 
 ### The basics
 
-When using pycv the user will need to create a module[^1] that must at least contain an initialization dictionary and a calculate function
+When using PyCV the user will need to create a module[^1] that must at least contain an initialization dictionary and a calculate function
 
 [^1]: a module is a `.py` file or a directory that contains a `__init__.py`, here we will only show `py` files
 

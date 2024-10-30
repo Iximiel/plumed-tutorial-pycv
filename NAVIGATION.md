@@ -1,6 +1,6 @@
-# How to use pycv
+# How to use PyCV
 
-The lesson contains a guide to set up pycv and some simple examples.
+The lesson contains a guide to set up PyCV and some simple examples.
 
 
 ```mermaid
