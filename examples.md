@@ -16,7 +16,7 @@ This is a bonus, but can be helpful:
 ###### plumed.dat
 
 ```plumed
-LOAD=/path/to/PythonCVInterface.so
+LOAD FILE=/path/to/PythonCVInterface.so
 
 cvdist: PYCVINTERFACE IMPORT=pyhelp
 ```
