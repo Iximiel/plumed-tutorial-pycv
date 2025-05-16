@@ -1,33 +1,54 @@
 # Using PyCV
 ## Installation
 
-_Note that currently we are working on a simpler installation procedure, and some names may change. The actual version cannot be called from within the plumed python interface_
-
-For compiling the plugin you just need pybind11 and numpy.
-I always recommend creating and ad-hoc environment for your projects:
-```bash
-python3 -m venv pycvenv
-source ./pycvenv/bin/activate
-pip install -U pip
-pip install -r requirements.txt
+It should be sufficient to run, ideally in a virtual or conda environment.
+From the plumed source directory run:
+```sh
+cd plugins/pycv
+pip install .
 ```
-The requirements.txt file is in the home of the plug in (`plumeddir/plugins/pycv`)
+You will need to have plumed avaiable in your path or through `pkg-config`
 
-If you have a plumed that supports plumed mklib with multiple files you can simply
-```bash
-./standaloneCompile.sh
+Required dependencies `numpy` and `pybind11` are installed as part of the installation process.
+
+>[!NOTE]
+>Note that an in-place installation, `pip install -e .`, won't work. 
+
+>[!NOTE]
+>To get the position of the shared object to load with the LOAD action, call `python -m pycv`, see [the examples](examples.md)
+
+### Known runtime problems
+
+On some platforms, *embedded* Python interpreters  (such as the one used in PYCV) appear to behave 
+differently than the plain ones, raising surprising errors.  For example:
+
+>[!NOTE]
+>Some Python configurations (e.g. Conda under Linux) require the
+ Python shared library to be found in the LD_LIBRARY_PATH, 
+ ignoring the activated environment.  This manifests itself with an
+ error like:
+
 ```
-This usually goes smooth, especially if plumed has already found the necessary python configuration and `plumed --no-mpi config makefile_conf | grep canPyCV` returns `canPyCV=yes`.
+      libpython3.13.so.1.0: cannot open shared object file: No such file or directory
+```
 
-After running `./standaloneCompile.sh` you should have a `PythonCVInterface.so` file into the pycv directory
+>[!NOTE]
+>Similarly, some Python configurations (e.g. MacOS) ignore the current
+ environment when searching for packages (e.g. `numpy`). Hence,
+ one should set PYTHONPATH manually.  This manifests itself with an
+ error like:
 
-### The basics
+```
+      No module named numpy
+```
+
+## The basics
 
 When using PyCV the user will need to create a module[^1] that must at least contain an initialization dictionary and a calculate function
 
 [^1]: a module is a `.py` file or a directory that contains a `__init__.py`, here we will only show `py` files
 
-#### What to write in the plumed.dat (PYCVINTERFACE)
+### What to write in the plumed.dat (PYCVINTERFACE)
 
 ```plumed
 cvPY: PYCVINTERFACE ATOMS=1,4 IMPORT=pydistancePBCs CALCULATE=pydist
@@ -43,7 +64,7 @@ cvPY: PYCVINTERFACE ATOMS=1,4 IMPORT=pydistancePBCs CALCULATE=pydist
   - `PREPARE` indicates the function to call at prepare time. Ignored if not specified
   - `UPDATE` indicates the function to call at update time. Ignored if not specified
 
-#### What to write in the plumed.dat (PYFUNCTION)
+### What to write in the plumed.dat (PYFUNCTION)
 ```plumed
 d1: DISTANCE ATOMS=1,2
 d2: DISTANCE ATOMS=1,3 
@@ -69,7 +90,7 @@ def plumedCalculate(action: PLMD.PythonFunction):
     arg = [action.argument(0),action.argument(1)]
     return arg[0]*arg[0]*arg[1]
 ```
-#### The functions
+### The functions
 
 For both PYFUNCTION and PYCVINTERFACE the function called by plumed must accept a specific object.
     - PYCVINTERFACE functions will expect a `plumedCommunications.PythonCVInterface` object
@@ -80,7 +101,7 @@ These objects are used to retrieve data and settings from plumed. Plumed will ge
 In the [examples](examples.md#getting-the-manual) I show how to retrieve the manual for those objects
 
 
-#### Initialization
+### Initialization
 
 If in the plumed.dat `INIT` is not specified, plumed will search for an object "plumedInit",
 that can be either a function that returns a dict or a dict
@@ -117,7 +138,7 @@ contains a submodule `defaults` with the default dictionaries already set up:
  - `plumedCommunications.defaults.COMPONENT={"period":None, "derivative":True}`
  - `plumedCommunications.defaults.COMPONENT_NODEV={"period":None, "derivative":False}`
 
-#### Calculate
+### Calculate
 
 If `CALCULATE` is not specified, plumed will search for a function named
 "plumedCalculate" plumed will read the variable returned accordingly to what it
@@ -142,7 +163,7 @@ derivative (that can also have shape(9), with format (x_x, x_y, x_z, y_x, y_y,
 y_z, z_x, z_y, z_z)), if the box derivative are not present a WARNING will be
 raised, but the calculation won't be interrupted.
 
-#### Prepare
+### Prepare
 
 If the `PREPARE` keyword is used, the defined function will be called at
 prepare time, before calculate.
@@ -156,7 +177,7 @@ def changeAtom(plmdAction: plumedCommunications.PythonCVInterface):
         toret["setAtomRequest"] = "1,2"
     return toret
 ```
-#### Update
+### Update
 
 If the `UPDATE` keyword is used, the defined function will be called at update
 time, after calculate. As now plumed will ignore the return of this function
@@ -167,7 +188,7 @@ In the example `plmdAction.data["pycv"]=0` is initialized in `pyinit` and its
 value is updated in calculate.
 
 
-#### The `data` attribute
+### The `data` attribute
 The plumedCommunications.PythonCVInterface has a `data` attribute that is a
 dictionary and can be used to store data during the calculations
 

@@ -1,12 +1,17 @@
 # Examples
 
-All the example are run withing the same environment of the installation procedure
+All the example are run within the same environment of the installation procedure
 ```bash
 source ./pycvenv/bin/activate
 ```
 Things to know:
  - I am always using "path/to" for indication the directory that contain a file
  - Python will communicate with plumed using a module called "plumedCommunications" that is embedded with `PythonCVInterface.so`
+ - The string `path/to/PythonCVInterface.so` can be obtained by running `python -m pycv`
+ - The string `path/to/PythonCVInterface.so` can be obtained within a python script with 
+ ```python
+ from pycv import getPythonCVInterface;print(getPythonCVInterface())
+ ```
 
 
 ### Getting the manual
@@ -71,7 +76,7 @@ In this example we show how to use the PBCs in a calculation:
 
 ###### plumed.dat
 ```plumed
-LOAD FILE=path/to/PythonCVInterface.so
+LOAD GLOBAL FILE=path/to/PythonCVInterface.so
 
 cvPY: PYCVINTERFACE ATOMS=1,4 IMPORT=pydistancePBCs CALCULATE=pydist
 
@@ -104,7 +109,7 @@ Here we are getting the pbc calculator from plumed and "patching" the distances 
 This is just an example on how the user can work with the periodicity of the retuned variables
 ###### plumed.dat
 ```plumed
-LOAD FILE=path/to/PythonCVInterface.so
+LOAD GLOBAL FILE=path/to/PythonCVInterface.so
 
 cvPY: PYCVINTERFACE IMPORT=periodicity
 
@@ -139,7 +144,7 @@ def plumedCalculate(action: PLMD.PythonCVInterface):
 
 ###### plumed.dat
 ```plumed
-LOAD FILE=path/to/PythonCVInterface.so
+LOAD GLOBAL FILE=path/to/PythonCVInterface.so
 
 cvPY: PYCVINTERFACE ATOMS=2,4 IMPORT=mdInfo PREPARE=myPrepare
 
@@ -164,4 +169,27 @@ def myPrepare(action: PLMD.PythonCVInterface):
     
 def plumedCalculate(action: PLMD.PythonCVInterface):
     return 0.0
+```
+
+### Using PyCV when in a plumed-python script
+
+```python
+from plumed import Plumed
+def preparePlumedWithPyCV(num_atoms: int):
+   from pycv import getPythonCVInterface
+
+   # Create PLUMED object and read input
+   plmd = Plumed()
+
+   # not really needed, used to check https://github.com/plumed/plumed2/issues/916
+   plumed_version = np.zeros(1, dtype=np.intc)
+   plmd.cmd("getApiVersion", plumed_version)
+   plmd.cmd("setMDEngine", "python")
+   plmd.cmd("setTimestep", 1.0)
+   plmd.cmd("setKbT", 1.0)
+   plmd.cmd("setNatoms", num_atoms)
+   plmd.cmd("setLogFile", "test.log")
+   plmd.cmd("init")
+   plmd.cmd("readInputLine", f"LOAD FILE={getPythonCVInterface()}")
+   return plmd
 ```
